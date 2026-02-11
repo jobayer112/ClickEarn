@@ -6,7 +6,7 @@
     <title>AdClickEarn - Click Ads & Earn Money</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* === GLOBAL STYLES (unchanged, only bottom-nav added) === */
+        /* === GLOBAL STYLES (unchanged, only chat modal added) === */
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +17,7 @@
             background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: #333;
             min-height: 100vh;
-            padding: 20px 20px 80px; /* extra bottom padding for fixed nav */
+            padding: 20px 20px 80px;
             position: relative;
         }
         .scrolling-warning {
@@ -503,7 +503,7 @@
         }
         .currency-symbol, .bdt-symbol { color: #e67e22; font-weight: bold; }
 
-        /* ===== BOTTOM NAVIGATION BAR (NEW) ===== */
+        /* ===== BOTTOM NAVIGATION BAR ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -539,19 +539,125 @@
             font-size: 20px;
             color: #1a2980;
         }
-        .nav-item span {
-            font-weight: 500;
+        .nav-item span { font-weight: 500; }
+        .nav-item:hover { background-color: #f0f8ff; }
+        .nav-item.active { color: #1a2980; font-weight: bold; }
+        .nav-item.active i { color: #e67e22; }
+
+        /* ===== AI CHAT MODAL STYLES (NEW) ===== */
+        #ai-chat-modal .modal-content {
+            max-width: 450px;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+            max-height: 80vh;
         }
-        .nav-item:hover {
-            background-color: #f0f8ff;
+        .chat-header {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .nav-item.active {
-            color: #1a2980;
-            font-weight: bold;
+        .chat-header h3 {
+            margin: 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .nav-item.active i {
-            color: #e67e22;
+        .chat-header i { font-size: 24px; }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 80%;
+        }
+        .chat-message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1a2980;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .chat-message.user .chat-avatar {
+            background-color: #e67e22;
+        }
+        .chat-bubble {
+            background-color: white;
+            padding: 12px 16px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            word-break: break-word;
+        }
+        .chat-message.user .chat-bubble {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 18px;
+        }
+        .chat-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 5px;
+            text-align: right;
+        }
+        .chat-message.user .chat-time { color: rgba(255,255,255,0.8); }
+        .chat-input-area {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        .chat-input:focus {
+            border-color: #1a2980;
+        }
+        .chat-send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-send-btn:hover { background: #0e1a5a; }
+        .chat-send-btn:disabled { background: #ccc; cursor: not-allowed; }
 
         @media (max-width: 768px) {
             main { grid-template-columns: 1fr; }
@@ -567,6 +673,7 @@
             .country-flags { justify-content: flex-start; overflow-x: auto; padding-bottom: 10px; }
             .country-flag { flex-shrink: 0; }
             .scrolling-warning { font-size: 14px; }
+            #ai-chat-modal .modal-content { width: 95%; height: 70vh; }
         }
         @media (max-width: 480px) {
             .ads-container { grid-template-columns: repeat(2,1fr); gap: 5px; max-height: 500px; }
@@ -681,7 +788,7 @@
                     <button class="btn btn-success" id="create-new-account-btn" style="margin-top: 20px; padding: 12px 25px;"><i class="fas fa-user-plus"></i> Create New Account</button>
                 </div>
                 
-                <!-- SHARE SECTION – UPDATED REFERRAL LINK (STATIC) -->
+                <!-- SHARE SECTION – STATIC REFERRAL LINK -->
                 <div class="share-section">
                     <h3><i class="fas fa-share-alt"></i> Share Daily & Earn <span class="bdt-symbol">৳</span>20</h3>
                     <p>Share our Telegram bot with your friends every day and earn <span class="bdt-symbol">৳</span>20 when someone joins!</p>
@@ -764,7 +871,7 @@
         </footer>
     </div>
 
-    <!-- ===== BOTTOM NAVIGATION BAR (NEW) ===== -->
+    <!-- ===== BOTTOM NAVIGATION BAR ===== -->
     <div class="bottom-nav">
         <button class="nav-item" id="nav-profile">
             <i class="fas fa-user-circle"></i>
@@ -788,12 +895,12 @@
         </button>
     </div>
 
-    <!-- MODALS (unchanged, except share link values updated) -->
+    <!-- MODALS (unchanged, plus new AI chat modal) -->
     <div class="modal" id="login-modal"><div class="modal-content"><div class="modal-header"><h3>Login to Your Account</h3><button class="close-modal">×</button></div><form id="login-form"><div class="form-group"><label for="login-username">Username</label><input type="text" id="login-username" required></div><div class="form-group"><label for="login-password">Password</label><input type="password" id="login-password" required></div><button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Login</button></form><p style="margin-top: 15px; text-align: center; color: #666;">Don't have an account? <a href="#" id="switch-to-register" style="color: #1a2980; font-weight: bold;">Register here</a></p></div></div>
     <div class="modal" id="register-modal"><div class="modal-content"><div class="modal-header"><h3>Create New Account</h3><button class="close-modal">×</button></div><form id="register-form"><div class="form-group"><label for="register-username">Username</label><input type="text" id="register-username" required></div><div class="form-group"><label for="register-email">Email</label><input type="email" id="register-email" required></div><div class="form-group"><label for="register-password">Password</label><input type="password" id="register-password" required></div><div class="form-group"><label for="register-confirm-password">Confirm Password</label><input type="password" id="register-confirm-password" required></div><button type="submit" class="btn btn-success" style="width: 100%; padding: 12px;">Register</button></form><p style="margin-top: 15px; text-align: center; color: #666;">Already have an account? <a href="#" id="switch-to-login" style="color: #1a2980; font-weight: bold;">Login here</a></p></div></div>
     <div class="modal" id="withdraw-modal"><div class="modal-content"><div class="modal-header"><h3>Withdraw Your Earnings</h3><button class="close-modal">×</button></div><div id="withdraw-success" style="text-align: center; display: none;"><i class="fas fa-check-circle" style="font-size: 64px; color: #28a745; margin-bottom: 20px;"></i><h3>Withdrawal Request Submitted!</h3><p>Your request to withdraw <span class="bdt-symbol">৳</span>1000 has been submitted successfully.</p><p>Our team will process your payment within 24 hours.</p><button class="btn btn-primary" style="margin-top: 20px; width: 100%; padding: 12px;" id="close-withdraw-modal">OK</button></div><div id="withdraw-fail" style="text-align: center; display: none;"><i class="fas fa-exclamation-triangle" style="font-size: 64px; color: #dc3545; margin-bottom: 20px;"></i><h3>Account Banned!</h3><p>Your account has been banned due to fake clicks or not completing ads.</p><p style="margin: 15px 0; font-size: 18px;">You earned: <strong><span class="bdt-symbol">৳</span><span id="banned-withdraw-earnings">0.00</span></strong></p><p>Please create a new account to continue.</p><button class="btn btn-success" id="create-new-after-ban" style="margin-top: 20px; width: 100%; padding: 12px;"><i class="fas fa-user-plus"></i> Create New Account</button></div><div id="withdraw-form"><p>You are about to withdraw <span class="bdt-symbol">৳</span>1000 from your account.</p><div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;"><div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span>Current Balance:</span><span style="font-weight: bold;"><span class="bdt-symbol">৳</span><span id="modal-balance">0.00</span></span></div><div style="display: flex; justify-content: space-between;"><span>Withdrawal Amount:</span><span style="font-weight: bold; color: #28a745;"><span class="bdt-symbol">৳</span>1000.00</span></div></div><div class="form-group"><label for="payment-method">Payment Method</label><select id="payment-method"><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="paypal">PayPal</option><option value="bank">Bank Transfer</option><option value="crypto">Cryptocurrency</option><option value="skrill">Skrill</option><option value="neteller">Neteller</option><option value="payoneer">Payoneer</option></select></div><div class="form-group"><label for="payment-details" id="payment-details-label">bKash Account Number</label><input type="text" id="payment-details" required placeholder="Enter your bKash account number"><small id="payment-hint" style="color: #666; font-size: 12px;">Enter your bKash mobile number (e.g., 01XXXXXXXXX)</small></div><button type="button" class="btn btn-success" style="width: 100%; padding: 12px;" id="confirm-withdraw-btn"><i class="fas fa-money-bill-wave"></i> Confirm Withdrawal</button><p style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;"><i class="fas fa-info-circle"></i> Withdrawal will be processed within 24 hours</p></div></div></div>
     
-    <!-- SHARE MODAL – UPDATED REFERRAL LINK -->
+    <!-- SHARE MODAL – STATIC REFERRAL LINK -->
     <div class="modal" id="share-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -835,11 +942,29 @@
         </div>
     </div>
 
+    <!-- ===== NEW AI CHAT MODAL ===== -->
+    <div class="modal" id="ai-chat-modal">
+        <div class="modal-content">
+            <div class="chat-header">
+                <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                <button class="close-modal" style="color: white; background: none; border: none; font-size: 28px;">×</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Initial bot message will be inserted here via JS -->
+            </div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Type your message..." autocomplete="off">
+                <button class="chat-send-btn" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== MODIFIED & OPTIMIZED SCRIPT ====================
         // All visual/functional behavior remains IDENTICAL except:
         // 1. Bottom navigation bar added
         // 2. Referral link changed to static Telegram bot link with code G6JT
+        // 3. AI Chat modal with intelligent responses (NEW)
         // =====================================================================
         
         // ---------- CONSTANTS ----------
@@ -847,7 +972,6 @@
         const REFERRAL_REWARD = 20.00;        // ৳20 per referral
         const WITHDRAW_LIMIT = 1000.00;       // minimum withdrawal
         const DAILY_AD_LIMIT = 200;           // max ads per day
-        // NEW STATIC REFERRAL LINK
         const REFERRAL_LINK = "https://t.me/adclickbd_bot?start=G6JT";
 
         const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -944,12 +1068,16 @@
               shareTelegramBtn = document.getElementById('share-telegram'), shareTwitterBtn = document.getElementById('share-twitter'),
               shareEmailBtn = document.getElementById('share-email'), shareCopyBtn = document.getElementById('share-copy');
 
-        // ---------- BOTTOM NAVIGATION BUTTONS (NEW) ----------
-        const navProfile = document.getElementById('nav-profile');
-        const navTask = document.getElementById('nav-task');
-        const navWithdraw = document.getElementById('nav-withdraw');
-        const navSetting = document.getElementById('nav-setting');
-        const navAi = document.getElementById('nav-ai');
+        // bottom navigation
+        const navProfile = document.getElementById('nav-profile'), navTask = document.getElementById('nav-task'),
+              navWithdraw = document.getElementById('nav-withdraw'), navSetting = document.getElementById('nav-setting'),
+              navAi = document.getElementById('nav-ai');
+
+        // ---------- AI CHAT DOM ELEMENTS (NEW) ----------
+        const aiChatModal = document.getElementById('ai-chat-modal');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSendBtn = document.getElementById('chat-send-btn');
 
         // ---------- HELPER FUNCTIONS ----------
         function checkOnlineStatus() { return navigator.onLine; }
@@ -966,8 +1094,12 @@
             setTimeout(() => notification.remove(), 5000);
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        function closeModal(id) { 
+            document.getElementById(id).style.display = 'none'; 
+        }
 
         function saveUserData() {
             localStorage.setItem('adClickUserData', JSON.stringify(userData));
@@ -1171,12 +1303,11 @@
             if (userData.isLoggedIn && !userData.isAccountBanned) renderAds();
         }
 
-        // ---------- SHARE / REFERRAL (UPDATED – STATIC LINK) ----------
+        // ---------- SHARE / REFERRAL (STATIC LINK) ----------
         function openShareModal() {
             if (!checkOnlineStatus()) { showNotification('You are offline! Please connect to the internet to share.', 'error'); return; }
             if (!userData.isLoggedIn) { showNotification('Please login to share and earn rewards!', 'error'); openModal('login-modal'); return; }
             if (userData.isAccountBanned) { showNotification('Your account is banned. Please create a new account to continue.', 'error'); return; }
-            // Use static referral link
             shareLinkInput.value = REFERRAL_LINK;
             shareModalLinkInput.value = REFERRAL_LINK;
             openModal('share-modal');
@@ -1196,7 +1327,7 @@
 
         function shareOnSocialMedia(platform) {
             if (!checkOnlineStatus()) { showNotification('You are offline!', 'error'); return; }
-            const shareUrl = REFERRAL_LINK;  // use static link
+            const shareUrl = REFERRAL_LINK;
             const shareText = "Earn money by clicking ads on AdClickEarn! Join our Telegram bot and start earning today! Use code G6JT.";
             let shareWinUrl = '';
             switch(platform) {
@@ -1272,20 +1403,101 @@
             }
         }
 
-        // ---------- BOTTOM NAVIGATION HANDLERS (NEW) ----------
+        // ---------- AI CHAT FUNCTIONALITY (NEW) ----------
+        function initChat() {
+            // Clear any existing messages and add welcome message
+            chatMessages.innerHTML = '';
+            addBotMessage("Hello! I'm your AI assistant. How can I help you today? You can ask me about earnings, withdrawals, referrals, ads, or anything else about AdClickEarn.");
+        }
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isUser ? 'user' : ''}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-avatar';
+            avatar.innerHTML = isUser ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            bubble.innerHTML = `<p style="margin:0;">${text}</p><div class="chat-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addBotMessage(text) {
+            addMessage(text, false);
+        }
+
+        function addUserMessage(text) {
+            addMessage(text, true);
+        }
+
+        function getBotResponse(userMsg) {
+            const msg = userMsg.toLowerCase();
+            
+            if (msg.includes('balance') || msg.includes('money') || msg.includes('earn')) {
+                return userData.isLoggedIn 
+                    ? `Your current balance is ৳${userData.balance.toFixed(2)}. Keep clicking ads to earn more!`
+                    : "Please login to see your balance. You can earn ৳0.60 per ad click!";
+            }
+            else if (msg.includes('withdraw') || msg.includes('cash out')) {
+                if (!userData.isLoggedIn) return "Please login to withdraw your earnings.";
+                if (userData.isAccountBanned) return "Your account is banned. You cannot withdraw.";
+                return `Minimum withdrawal is ৳${WITHDRAW_LIMIT}. Your balance: ৳${userData.balance.toFixed(2)}. ${userData.balance >= WITHDRAW_LIMIT ? 'You can withdraw now!' : `You need ৳${(WITHDRAW_LIMIT - userData.balance).toFixed(2)} more to withdraw.`}`;
+            }
+            else if (msg.includes('referral') || msg.includes('share') || msg.includes('friend')) {
+                return `Share your referral link: ${REFERRAL_LINK} You earn ৳${REFERRAL_REWARD} every day when someone joins using your link!`;
+            }
+            else if (msg.includes('ad') || msg.includes('click')) {
+                return `Each ad click earns you ৳${EARN_PER_CLICK}. You can click up to ${DAILY_AD_LIMIT} ads per day. After clicking, please stay on the ad page for 5-10 seconds to earn.`;
+            }
+            else if (msg.includes('country') || msg.includes('location')) {
+                return `Please select your country from the country selector above. This helps us show you better ads.`;
+            }
+            else if (msg.includes('ban') || msg.includes('banned')) {
+                return "Accounts are banned if we detect fake clicks or if you don't complete the ads. Please always wait 5-10 seconds on the ad page.";
+            }
+            else if (msg.includes('help') || msg.includes('hi') || msg.includes('hello')) {
+                return "Hi there! I can answer questions about earnings, withdrawals, referrals, ads, and more. What would you like to know?";
+            }
+            else {
+                return "I'm not sure I understand. You can ask me about your balance, how to withdraw, referral earnings, ad clicks, or country selection.";
+            }
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+            
+            addUserMessage(message);
+            chatInput.value = '';
+            
+            // Simulate AI thinking
+            chatSendBtn.disabled = true;
+            setTimeout(() => {
+                const response = getBotResponse(message);
+                addBotMessage(response);
+                chatSendBtn.disabled = false;
+                chatInput.focus();
+            }, 600);
+        }
+
+        // ---------- BOTTOM NAVIGATION HANDLERS (UPDATED WITH AI CHAT) ----------
         function setupBottomNav() {
             navProfile.addEventListener('click', function() {
                 if (!userData.isLoggedIn) {
                     showNotification('Please login to view your profile.', 'info');
                     openModal('login-modal');
                 } else {
-                    // Scroll to sidebar or open profile modal? For now, scroll to top where account info is.
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     showNotification('Profile section', 'info');
                 }
             });
             navTask.addEventListener('click', function() {
-                // Scroll to ads container
                 document.getElementById('ads-container').scrollIntoView({ behavior: 'smooth' });
             });
             navWithdraw.addEventListener('click', function() {
@@ -1299,13 +1511,12 @@
                 }
             });
             navSetting.addEventListener('click', function() {
-                // Scroll to country selector as a simple "settings" area
                 document.querySelector('.country-selector').scrollIntoView({ behavior: 'smooth' });
                 showNotification('Settings: Select your country', 'info');
             });
             navAi.addEventListener('click', function() {
-                // AI section placeholder
-                showNotification('AI features coming soon!', 'info');
+                openModal('ai-chat-modal');
+                initChat(); // Reset chat when opening
             });
         }
 
@@ -1330,6 +1541,18 @@
                     adsContainer.innerHTML = `<div class="offline-message"><i class="fas fa-wifi-slash"></i><h3>You are Offline!</h3><p>Please check your internet connection.</p></div>`;
                 }
             });
+
+            // Chat send event
+            chatSendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            // Close chat modal properly (override close button inside header)
+            const chatCloseBtn = aiChatModal.querySelector('.close-modal');
+            if (chatCloseBtn) {
+                chatCloseBtn.addEventListener('click', () => closeModal('ai-chat-modal'));
+            }
         }
 
         // ---------- EVENT LISTENERS ----------
@@ -1341,8 +1564,13 @@
 
         logoutBtn.addEventListener('click', () => { userData.isLoggedIn = false; saveUserData(); updateUIForLoggedOutUser(); showNotification('You have been logged out.', 'info'); });
 
-        closeModalButtons.forEach(b => b.addEventListener('click', function() { this.closest('.modal').style.display = 'none'; }));
-        window.addEventListener('click', e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; });
+        closeModalButtons.forEach(b => b.addEventListener('click', function() { 
+            const modal = this.closest('.modal');
+            if (modal) modal.style.display = 'none'; 
+        }));
+        window.addEventListener('click', e => { 
+            if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
+        });
 
         switchToRegister.addEventListener('click', e => { e.preventDefault(); closeModal('login-modal'); openModal('register-modal'); });
         switchToLogin.addEventListener('click', e => { e.preventDefault(); closeModal('register-modal'); openModal('login-modal'); });
