@@ -6,6 +6,7 @@
     <title>AdClickEarn • Earn by clicking ads</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* (styles unchanged – same as before) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
         body {
             background: linear-gradient(145deg, #0b1a33 0%, #1b3b4f 100%);
@@ -423,6 +424,21 @@
             const REFEREE_BONUS = 30;
             const TG_BASE = "https://t.me/adclickbd_bot?start=";
 
+            // ---------- AD LINKS (provided by user, deduplicated to keep it clean) ----------
+            const adLinks = [
+                "https://progenybanquet.com/dsj4ug5tz?key=618f6fe78e0d792db723742816a2d866",
+                "https://zobaerhasan.blogspot.com/",
+                "https://progenybanquet.com/q489p2sz4?key=8d1d716a03277052cf546c6b424cfc9c",
+                "https://otieu.com/4/10248735",
+                "https://wwp.ailooe.com/redirect-zone/ae0a37f4",
+                "https://progenybanquet.com/sfn33s5iih?key=d79dbeee8367db2efa67bd05f3df9675",
+                "https://tinyurl.com/Nucciba",
+                "https://progenybanquet.com/vp8vd3gx?key=3650327b8916680f59445f08ed9a14e0",
+                "https://otieu.com/4/10427035",
+                "https://wwp.ailooe.com/redirect-zone/73c3553d",
+                "https://otieu.com/4/10332961"
+            ];
+
             // ---------- STATE ----------
             let allUsers = JSON.parse(localStorage.getItem('adclick_users')) || [];
             let currentUser = null;
@@ -563,7 +579,11 @@
             function handleAdClick(adId) {
                 if (!currentUser) return notify('Login first', 'error');
                 if ((currentUser.clickedAds && currentUser.clickedAds.includes(adId)) || currentUser.todayClicks >= DAILY_AD_LIMIT) return;
-                window.open('https://example.com/ad', '_blank'); // dummy
+                
+                // Open a real ad link from the provided list (cycle through them)
+                const linkIndex = (adId - 1) % adLinks.length;
+                window.open(adLinks[linkIndex], '_blank');
+
                 currentUser.balance = (currentUser.balance || 0) + EARN_PER_CLICK;
                 currentUser.totalEarnings = (currentUser.totalEarnings || 0) + EARN_PER_CLICK;
                 currentUser.todayClicks = (currentUser.todayClicks || 0) + 1;
@@ -578,20 +598,26 @@
                 notify(`+৳${EARN_PER_CLICK} earned!`, 'success');
             }
 
-            // Apply referral bonus on registration
+            // Apply referral bonus on registration (fixed: now referrer gets update and it's saved)
             function applyReferralBonus(referralCode, newUser) {
                 if (!referralCode) return;
                 const referrer = allUsers.find(u => u.referralCode === referralCode);
                 if (!referrer || referrer.username === newUser.username) return;
+                
+                // Give referrer bonus
                 referrer.balance = (referrer.balance || 0) + REFERRER_BONUS;
                 referrer.referralEarnings = (referrer.referralEarnings || 0) + REFERRER_BONUS;
+                
+                // Give new user bonus
                 newUser.balance = (newUser.balance || 0) + REFEREE_BONUS;
                 newUser.totalEarnings = (newUser.totalEarnings || 0) + REFEREE_BONUS;
                 newUser.referredBy = referralCode;
-                // Update referrer in allUsers (already in-place, but ensure)
-                const idx = allUsers.findIndex(u => u.username === referrer.username);
-                if (idx !== -1) allUsers[idx] = referrer;
+                
+                // No need to reassign referrer in allUsers because it's already a reference, but we'll ensure it's saved later
+                // (allUsers is updated automatically, and we'll call saveAllUsers after push)
+                
                 notify(`You got ৳${REFEREE_BONUS} bonus from referral!`, 'success');
+                // Optionally notify referrer? Not possible since they're not logged in, but balance is updated in DB.
             }
 
             // ---------- REGISTER ----------
@@ -627,9 +653,9 @@
                 if (referralCode) applyReferralBonus(referralCode, newUser);
 
                 allUsers.push(newUser);
-                saveAllUsers();
+                saveAllUsers(); // saves both new user and updated referrer
                 currentUser = newUser;
-                localStorage.setItem('currentUsername', username); // session
+                localStorage.setItem('currentUsername', username);
                 refreshUI();
                 renderAds();
                 closeModal('register-modal');
@@ -741,7 +767,7 @@
             document.getElementById('switch-to-register').addEventListener('click', (e) => { e.preventDefault(); closeModal('login-modal'); openModal('register-modal'); });
             document.getElementById('switch-to-login').addEventListener('click', (e) => { e.preventDefault(); closeModal('register-modal'); openModal('login-modal'); });
 
-            // ========== FIX: make login/register buttons open modals ==========
+            // make login/register buttons open modals
             loginBtn.addEventListener('click', () => openModal('login-modal'));
             registerBtn.addEventListener('click', () => openModal('register-modal'));
 
